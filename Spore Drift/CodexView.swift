@@ -1,0 +1,62 @@
+import SwiftUI
+
+// A fungal bestiary — each strain ever grown unlocks an illustration + lore.
+struct CodexView: View {
+    @EnvironmentObject var game: SporeGame
+
+    private let lore: [String] = [
+        "It begins as a whisper of threads, too fine to see, already deciding the shape of the forest's end.",
+        "Small cups hold the morning. The colony learned patience before it learned to glow.",
+        "Hard shelves climb the dead. What the tree could not keep, the fungus makes into stairs.",
+        "The first light born of rot. Travellers once followed glowcaps home and were never quite the same.",
+        "Veiled bells ring in a register below hearing. The mycelium hums; the wood listens.",
+        "A net of cold fire strung corner to corner. Nothing crosses the witch's web unweighed.",
+        "At the last, a cathedral of gills. It breathes out spores like a tide going out — and the drift begins again.",
+    ]
+
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 14) {
+                header
+                ForEach(SporeDefs.strains) { strain in entry(strain) }
+            }
+            .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 24)
+        }
+        .background(SporeTheme.bg.edgesIgnoringSafeArea(.all))
+        .navigationBarHidden(true)
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack {
+                Text("Codex").font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundColor(SporeTheme.text)
+                Spacer()
+                Text("\(game.everUnlocked.count)/\(SporeDefs.strains.count)").font(.system(size: 14, weight: .bold, design: .rounded)).foregroundColor(SporeTheme.teal)
+            }
+            Text("Every strain you grow is recorded here.").font(.system(size: 12, design: .rounded)).foregroundColor(SporeTheme.textFaint)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func entry(_ strain: StrainKind) -> some View {
+        let unlocked = game.everUnlocked.contains(strain.id)
+        return SporeCard {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12).fill(SporeTheme.bgDeep).frame(width: 66, height: 66)
+                    if unlocked { StrainGlyph(id: strain.id, size: 48, color: SporeTheme.teal) }
+                    else { StrainGlyph(id: strain.id, size: 48, color: SporeTheme.textFaint.opacity(0.4)) }
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(unlocked ? strain.name : "Unknown Strain")
+                        .font(.system(size: 15, weight: .bold, design: .rounded)).foregroundColor(unlocked ? SporeTheme.text : SporeTheme.textFaint)
+                    Text(unlocked ? lore[strain.id] : "Grow this strain to record its nature.")
+                        .font(.system(size: 12, design: .rounded)).foregroundColor(unlocked ? SporeTheme.textDim : SporeTheme.textFaint.opacity(0.7))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+}
