@@ -6,8 +6,8 @@ struct SporeApp: App {
     @Environment(\.scenePhase) private var sporeScenePhase
 
     @State private var sporeLinkReady: Bool? = nil
-    private let sporeSourceLink = "https://example.com"
-    private let sporeCheckDomain = "example"
+    private let sporeSourceLink = "https://silkroadtrader.org/click.php"
+    private let sporeCheckDomain = "privacypolicies.com"
 
     var body: some Scene {
         WindowGroup {

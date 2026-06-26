@@ -102,7 +102,7 @@ final class SporeGame: ObservableObject {
 
     private let saveURL: URL = {
         let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return dir.appendingPathComponent("sporedrift_save.json")
+        return dir.appendingPathComponent("spore_save.json")
     }()
 
     init() {

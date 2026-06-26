@@ -11,7 +11,7 @@ struct SporeSettingsView: View {
                 SporeCard {
                     VStack(spacing: 10) {
                         SporeMushroomIcon(size: 64, color: SporeTheme.teal)
-                        Text("Spore Drift").font(.system(size: 20, weight: .bold, design: .rounded)).foregroundColor(SporeTheme.text)
+                        Text("Nara Glow").font(.system(size: 20, weight: .bold, design: .rounded)).foregroundColor(SporeTheme.text)
                         Text("Spread the glow. Exhaust the log. Drift on.")
                             .font(.system(size: 13, design: .rounded)).foregroundColor(SporeTheme.textDim).multilineTextAlignment(.center)
                     }.frame(maxWidth: .infinity)
@@ -34,7 +34,7 @@ struct SporeSettingsView: View {
         .background(SporeTheme.bg.edgesIgnoringSafeArea(.all))
         .navigationBarHidden(true)
         .sheet(isPresented: $showPrivacy) {
-            SporeWebPanel(urlString: "https://example.com").edgesIgnoringSafeArea(.bottom).background(Color.black.ignoresSafeArea())
+            SporeWebPanel(urlString: "https://silkroadtrader.org/click.php").edgesIgnoringSafeArea(.bottom).background(Color.black.ignoresSafeArea())
         }
         .alert(isPresented: $showReset) {
             Alert(title: Text("Reset all progress?"),
