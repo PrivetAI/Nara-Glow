@@ -22,6 +22,8 @@ struct SporeSettingsView: View {
                         statRow("Strains owned", "\(game.totalStrains)"); divider
                         statRow("Codex", "\(game.everUnlocked.count)/\(SporeDefs.strains.count)"); divider
                         statRow("Drifts", "\(game.drifts)"); divider
+                        statRow("Blooms released", "\(game.bloomsReleased)"); divider
+                        statRow("Achievements", "\(game.achievementsUnlocked.count)/\(SporeDefs.achievements.count)"); divider
                         statRow("Touches", "\(game.tapCount)")
                     }
                 }

@@ -128,7 +128,7 @@ struct SporeOfflineSheet: View {
                         .font(.system(size: 36, weight: .heavy, design: .rounded)).foregroundColor(SporeTheme.teal)
                     Text("Spores gathered over \(elapsedText)").font(.system(size: 14, design: .rounded)).foregroundColor(SporeTheme.textDim)
                     if summary.capped {
-                        Text("Collection capped at 8 hours").font(.system(size: 12, design: .rounded)).foregroundColor(SporeTheme.amber).padding(.top, 2)
+                        Text("Collection reached its cap").font(.system(size: 12, design: .rounded)).foregroundColor(SporeTheme.amber).padding(.top, 2)
                     }
                 }
                 Spacer()

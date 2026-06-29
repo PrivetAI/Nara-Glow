@@ -4,6 +4,8 @@ struct ColonyView: View {
     @EnvironmentObject var game: SporeGame
     @State private var pulse: Double = 0
     @State private var floats: [SporeFloat] = []
+    @State private var bloomGlow: Double = 0
+    @State private var bloomFlash: String? = nil
 
     struct SporeFloat: Identifiable {
         let id = UUID()
@@ -23,6 +25,7 @@ struct ColonyView: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 16) {
                 counter
+                bloomPanel
                 logStage
                 shop
             }
@@ -50,6 +53,69 @@ struct ColonyView: View {
         }
         .frame(maxWidth: .infinity).padding(.vertical, 14)
         .background(RoundedRectangle(cornerRadius: 18).fill(SporeTheme.card).overlay(RoundedRectangle(cornerRadius: 18).stroke(SporeTheme.cardRaised, lineWidth: 1)))
+    }
+
+    // MARK: - Spore Bloom (active timing loop)
+
+    private var bloomPanel: some View {
+        let ready = game.pressureReady
+        let active = game.bloomActive
+        return VStack(spacing: 10) {
+            HStack(spacing: 6) {
+                Text("Spore Pressure").font(.system(size: 12, weight: .semibold, design: .rounded)).tracking(1).foregroundColor(SporeTheme.textDim)
+                Spacer()
+                if active {
+                    HStack(spacing: 4) {
+                        SporeBloomIcon(size: 12, color: SporeTheme.amber)
+                        Text(String(format: "×%.1f • %.0fs", SporeDefs.bloomBuffMult, game.bloomRemaining))
+                            .font(.system(size: 12, weight: .bold, design: .rounded)).foregroundColor(SporeTheme.amber)
+                    }
+                    .padding(.horizontal, 8).padding(.vertical, 3)
+                    .background(Capsule().fill(SporeTheme.amber.opacity(0.15)))
+                } else {
+                    Text(SporeFormat.percent(game.pressure))
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundColor(ready ? SporeTheme.amber : SporeTheme.textDim)
+                }
+            }
+            SporeMeter(fraction: game.pressure, color: ready ? SporeTheme.amber : SporeTheme.violet, height: 8)
+            Button(action: releaseBloom) {
+                HStack(spacing: 8) {
+                    SporeBloomIcon(size: 20, color: ready ? SporeTheme.bgDeep : SporeTheme.textFaint)
+                    Text(ready ? "Release Bloom" : (active ? "Blooming…" : "Pressure building…"))
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundColor(ready ? SporeTheme.bgDeep : SporeTheme.textFaint)
+                }
+                .frame(maxWidth: .infinity).padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(ready ? SporeTheme.amber : SporeTheme.cardRaised)
+                        .shadow(color: SporeTheme.amber.opacity(ready ? 0.5 * bloomGlow : 0), radius: 12)
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
+            .disabled(!ready)
+            if let flash = bloomFlash {
+                Text(flash).font(.system(size: 13, weight: .bold, design: .rounded)).foregroundColor(SporeTheme.amber)
+            } else {
+                Text("Burst spores + ×\(String(format: "%.1f", SporeDefs.bloomBuffMult)) production for \(Int(game.bloomBuffDuration))s")
+                    .font(.system(size: 11, design: .rounded)).foregroundColor(SporeTheme.textFaint)
+            }
+        }
+        .padding(14)
+        .background(RoundedRectangle(cornerRadius: 16).fill(SporeTheme.card)
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(ready ? SporeTheme.amber.opacity(0.6) : SporeTheme.cardRaised, lineWidth: 1)))
+        .onAppear { withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) { bloomGlow = 1 } }
+    }
+
+    private func releaseBloom() {
+        guard game.pressureReady else { return }
+        let burst = game.bloomBurstAmount()
+        game.releaseBloom()
+        bloomFlash = "+\(SporeFormat.abbrev(burst)) burst!"
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+            withAnimation(.easeOut(duration: 0.3)) { bloomFlash = nil }
+        }
     }
 
     private var logStage: some View {

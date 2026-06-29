@@ -155,6 +155,41 @@ struct StrainGlyph: View {
                     var q = Path(); q.move(to: CGPoint(x: w*(0.12+t*0.76), y: h*0.18)); q.addLine(to: CGPoint(x: w*(0.12+t*0.76), y: h*0.82))
                     ctx.stroke(q, with: .color(c.opacity(0.5)), lineWidth: max(0.8, w*0.02))
                 }
+            case 7: // Wraith Gill — a draped curtain of light
+                for (i, dx) in [0.28,0.5,0.72].enumerated() {
+                    var drape = Path()
+                    drape.move(to: CGPoint(x: w*(dx-0.12), y: h*0.26))
+                    drape.addQuadCurve(to: CGPoint(x: w*(dx+0.12), y: h*0.26), control: CGPoint(x: w*dx, y: h*0.10))
+                    drape.addLine(to: CGPoint(x: w*(dx+0.10), y: h*0.84))
+                    drape.addQuadCurve(to: CGPoint(x: w*dx, y: h*0.74), control: CGPoint(x: w*(dx+0.04), y: h*0.82))
+                    drape.addQuadCurve(to: CGPoint(x: w*(dx-0.10), y: h*0.84), control: CGPoint(x: w*(dx-0.04), y: h*0.82))
+                    drape.closeSubpath()
+                    ctx.fill(drape, with: .color(c.opacity(i == 1 ? 0.85 : 0.55)))
+                }
+            case 8: // Ember Polypore — stacked glowing brackets with coals
+                for i in 0..<3 {
+                    let y = h*(0.30 + Double(i)*0.20)
+                    var sh = Path()
+                    sh.move(to: CGPoint(x: w*0.22, y: y))
+                    sh.addQuadCurve(to: CGPoint(x: w*0.80, y: y), control: CGPoint(x: w*0.51, y: y - h*0.16))
+                    sh.addQuadCurve(to: CGPoint(x: w*0.22, y: y), control: CGPoint(x: w*0.51, y: y + h*0.05))
+                    sh.closeSubpath()
+                    ctx.fill(sh, with: .color(c.opacity(0.85 - Double(i)*0.12)))
+                    ctx.fill(Path(ellipseIn: CGRect(x: w*0.47, y: y - h*0.05, width: w*0.07, height: w*0.07)), with: .color(SporeTheme.amber.opacity(0.9)))
+                }
+            case 9: // Cosmic Bloom — radial starburst cap
+                let cx = w*0.5, cy = h*0.46
+                for i in 0..<12 {
+                    let a = Double(i)/12 * 2 * .pi
+                    let r1 = min(w,h)*0.16, r2 = min(w,h)*0.40
+                    var ray = Path()
+                    ray.move(to: CGPoint(x: cx + CGFloat(cos(a))*r1, y: cy + CGFloat(sin(a))*r1))
+                    ray.addLine(to: CGPoint(x: cx + CGFloat(cos(a))*r2, y: cy + CGFloat(sin(a))*r2))
+                    ctx.stroke(ray, with: .color(c.opacity(0.7)), style: StrokeStyle(lineWidth: max(1, w*0.025), lineCap: .round))
+                }
+                ctx.fill(Path(ellipseIn: CGRect(x: cx-w*0.15, y: cy-w*0.15, width: w*0.30, height: w*0.30)), with: .color(c))
+                ctx.fill(Path(ellipseIn: CGRect(x: cx-w*0.06, y: cy-w*0.06, width: w*0.12, height: w*0.12)), with: .color(SporeTheme.amber.opacity(0.9)))
+                ctx.fill(Path(roundedRect: CGRect(x: w*0.45, y: cy, width: w*0.10, height: h*0.36), cornerRadius: w*0.04), with: .color(c.opacity(0.55)))
             default: // Titan Bloom — grand cap with gills
                 var cap = Path()
                 cap.move(to: CGPoint(x: w*0.10, y: h*0.52)); cap.addQuadCurve(to: CGPoint(x: w*0.90, y: h*0.52), control: CGPoint(x: w*0.5, y: h*0.06)); cap.closeSubpath()
@@ -206,6 +241,55 @@ struct SporeChevronIcon: View {
             var p = Path()
             p.move(to: CGPoint(x: w*0.38, y: h*0.24)); p.addLine(to: CGPoint(x: w*0.66, y: h*0.5)); p.addLine(to: CGPoint(x: w*0.38, y: h*0.76))
             ctx.stroke(p, with: .color(color), style: StrokeStyle(lineWidth: max(1.4, w*0.09), lineCap: .round, lineJoin: .round))
+        }
+        .frame(width: size, height: size)
+    }
+}
+
+// Bloom — a radiant spore-burst, used on the Release Bloom action.
+struct SporeBloomIcon: View {
+    var size: CGFloat; var color: Color
+    var body: some View {
+        Canvas { ctx, sz in
+            let w = sz.width, h = sz.height
+            let cx = w*0.5, cy = h*0.5
+            let rin = min(w,h)*0.14, rout = min(w,h)*0.42
+            for i in 0..<8 {
+                let a = Double(i)/8 * 2 * .pi
+                var ray = Path()
+                ray.move(to: CGPoint(x: cx + CGFloat(cos(a))*rin, y: cy + CGFloat(sin(a))*rin))
+                ray.addLine(to: CGPoint(x: cx + CGFloat(cos(a))*rout, y: cy + CGFloat(sin(a))*rout))
+                ctx.stroke(ray, with: .color(color.opacity(0.9)), style: StrokeStyle(lineWidth: max(1.2, w*0.05), lineCap: .round))
+                // outer motes
+                let mx = cx + CGFloat(cos(a))*rout, my = cy + CGFloat(sin(a))*rout
+                ctx.fill(Path(ellipseIn: CGRect(x: mx-w*0.03, y: my-w*0.03, width: w*0.06, height: w*0.06)), with: .color(color))
+            }
+            ctx.fill(Path(ellipseIn: CGRect(x: cx-rin, y: cy-rin, width: rin*2, height: rin*2)), with: .color(color))
+        }
+        .frame(width: size, height: size)
+    }
+}
+
+// Trophy — used for the Achievements section.
+struct SporeTrophyIcon: View {
+    var size: CGFloat; var color: Color
+    var body: some View {
+        Canvas { ctx, sz in
+            let w = sz.width, h = sz.height
+            var bowl = Path()
+            bowl.move(to: CGPoint(x: w*0.30, y: h*0.22))
+            bowl.addLine(to: CGPoint(x: w*0.70, y: h*0.22))
+            bowl.addQuadCurve(to: CGPoint(x: w*0.50, y: h*0.62), control: CGPoint(x: w*0.50, y: h*0.62))
+            bowl.closeSubpath()
+            ctx.fill(bowl, with: .color(color))
+            // handles
+            var lh = Path(); lh.addArc(center: CGPoint(x: w*0.30, y: h*0.30), radius: w*0.12, startAngle: .degrees(70), endAngle: .degrees(290), clockwise: false)
+            ctx.stroke(lh, with: .color(color.opacity(0.8)), lineWidth: max(1.2, w*0.05))
+            var rh = Path(); rh.addArc(center: CGPoint(x: w*0.70, y: h*0.30), radius: w*0.12, startAngle: .degrees(250), endAngle: .degrees(110), clockwise: false)
+            ctx.stroke(rh, with: .color(color.opacity(0.8)), lineWidth: max(1.2, w*0.05))
+            // stem + base
+            ctx.fill(Path(roundedRect: CGRect(x: w*0.46, y: h*0.60, width: w*0.08, height: h*0.16), cornerRadius: w*0.02), with: .color(color.opacity(0.7)))
+            ctx.fill(Path(roundedRect: CGRect(x: w*0.34, y: h*0.76, width: w*0.32, height: h*0.07), cornerRadius: w*0.02), with: .color(color))
         }
         .frame(width: size, height: size)
     }

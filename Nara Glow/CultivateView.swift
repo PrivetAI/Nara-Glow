@@ -8,6 +8,7 @@ struct CultivateView: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 16) {
                 driftCard
+                humusPerksSection
                 enzymesSection
             }
             .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 24)
@@ -31,7 +32,7 @@ struct CultivateView: View {
                     Text("Humus now: " + String(format: "×%.2f", game.humusMultiplier))
                         .font(.system(size: 12, weight: .medium, design: .rounded)).foregroundColor(SporeTheme.amber)
                     Spacer()
-                    Text("Gain: +\(SporeFormat.abbrev(max(0, game.pendingHumus() - game.humus))) Humus")
+                    Text("Gain: +\(SporeFormat.abbrev(game.humusGain())) Humus")
                         .font(.system(size: 12, weight: .medium, design: .rounded)).foregroundColor(SporeTheme.good)
                 }
                 if game.prestigeUnlocked {
@@ -60,6 +61,60 @@ struct CultivateView: View {
                   primaryButton: .destructive(Text("Drift")) { game.drift() },
                   secondaryButton: .cancel())
         }
+    }
+
+    private var humusPerksSection: some View {
+        VStack(spacing: 10) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Humus Perks").font(.system(size: 18, weight: .bold, design: .rounded)).foregroundColor(SporeTheme.text)
+                    Text("Spend Humus on permanent growth. Survives Drift.").font(.system(size: 12, design: .rounded)).foregroundColor(SporeTheme.textFaint)
+                }
+                Spacer()
+                HStack(spacing: 5) {
+                    SporeBloomIcon(size: 14, color: SporeTheme.amber)
+                    Text(SporeFormat.abbrev(game.humus)).font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundColor(SporeTheme.amber)
+                }
+                .padding(.horizontal, 10).padding(.vertical, 5)
+                .background(Capsule().fill(SporeTheme.amber.opacity(0.12)))
+            }
+            ForEach(SporeDefs.perks) { p in perkRow(p) }
+        }
+    }
+
+    private func perkRow(_ p: HumusPerk) -> some View {
+        let tier = game.perkTier(p.id)
+        let maxed = tier >= p.maxTier
+        let affordable = game.canBuyPerk(p)
+        let cost = game.perkCost(p)
+        return Button(action: { game.buyPerk(p) }) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack {
+                        Text(p.name).font(.system(size: 15, weight: .semibold, design: .rounded)).foregroundColor(SporeTheme.text)
+                        Spacer()
+                        Text("\(tier)/\(p.maxTier)").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundColor(SporeTheme.violet)
+                    }
+                    Text(p.blurb).font(.system(size: 11, design: .rounded)).foregroundColor(SporeTheme.textFaint).lineLimit(2)
+                }
+                if maxed {
+                    Text("MAX").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundColor(SporeTheme.good)
+                } else {
+                    HStack(spacing: 4) {
+                        SporeBloomIcon(size: 12, color: affordable ? SporeTheme.amber : SporeTheme.textFaint)
+                        Text(SporeFormat.abbrev(cost)).font(.system(size: 13, weight: .bold, design: .rounded))
+                            .foregroundColor(affordable ? SporeTheme.amber : SporeTheme.textFaint)
+                    }
+                }
+            }
+            .padding(12)
+            .background(RoundedRectangle(cornerRadius: 12).fill(SporeTheme.card)
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(maxed ? SporeTheme.good.opacity(0.4) : (affordable ? SporeTheme.amber.opacity(0.5) : SporeTheme.cardRaised.opacity(0.6)), lineWidth: 1)))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainButtonStyle())
+        .disabled(!affordable)
+        .opacity(maxed ? 0.85 : (affordable ? 1 : 0.78))
     }
 
     private var enzymesSection: some View {
