@@ -22,16 +22,23 @@ struct ColonyView: View {
     }
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 16) {
-                counter
-                bloomPanel
-                logStage
-                shop
+        GeometryReader { geo in
+            // Keep the decorative stage proportional to the available height so the
+            // Strains section stays reachable/visible on short viewports (incl. iPad
+            // iPhone-compatibility mode), instead of a fixed 250pt that pushes it off-screen.
+            let stageHeight = max(150, min(230, geo.size.height * 0.24))
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 12) {
+                    counter
+                    bloomPanel
+                    logStage(height: stageHeight)
+                    shop
+                }
+                .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 24)
+                .frame(minHeight: geo.size.height, alignment: .top)
             }
-            .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 24)
+            .background(SporeTheme.bg.edgesIgnoringSafeArea(.all))
         }
-        .background(SporeTheme.bg.edgesIgnoringSafeArea(.all))
         .navigationBarHidden(true)
     }
 
@@ -118,7 +125,7 @@ struct ColonyView: View {
         }
     }
 
-    private var logStage: some View {
+    private func logStage(height: CGFloat) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 18).fill(SporeTheme.bgDeep)
                 .overlay(RoundedRectangle(cornerRadius: 18).stroke(SporeTheme.cardRaised.opacity(0.6), lineWidth: 1))
@@ -134,7 +141,7 @@ struct ColonyView: View {
                 richnessBar.padding(.horizontal, 14).padding(.bottom, 10)
             }
         }
-        .frame(height: 250)
+        .frame(height: height)
         .contentShape(Rectangle())
         .gesture(DragGesture(minimumDistance: 0).onEnded { v in handleTap(at: v.location) })
     }
